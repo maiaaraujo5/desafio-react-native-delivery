@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import { Image, ScrollView } from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {Image, ScrollView} from 'react-native';
 
 import Icon from 'react-native-vector-icons/Feather';
-import { useNavigation } from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
 import Logo from '../../assets/logo-header.png';
 import SearchInput from '../../components/SearchInput';
 
@@ -46,20 +46,32 @@ interface Category {
 const Dashboard: React.FC = () => {
   const [foods, setFoods] = useState<Food[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<
-    number | undefined
-  >();
+  const [selectedCategory, setSelectedCategory] = useState<number | undefined>();
   const [searchValue, setSearchValue] = useState('');
 
   const navigation = useNavigation();
 
   async function handleNavigate(id: number): Promise<void> {
-    // Navigate do ProductDetails page
+    navigation.navigate('FoodDetails', {
+      id,
+    });
   }
 
   useEffect(() => {
     async function loadFoods(): Promise<void> {
-      // Load Foods from API
+      const response = await api.get('/foods', {
+        params: {
+          category_like: selectedCategory,
+          name_like: searchValue,
+        },
+      });
+
+      setFoods(
+        response.data.map((food: Food) => ({
+          ...food,
+          formattedPrice: formatValue(food.price),
+        })),
+      );
     }
 
     loadFoods();
@@ -67,20 +79,26 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     async function loadCategories(): Promise<void> {
-      // Load categories from API
+      const response = await api.get('/categories');
+
+      setCategories(response.data);
     }
 
     loadCategories();
   }, []);
 
   function handleSelectCategory(id: number): void {
-    // Select / deselect category
+    if (selectedCategory === id) {
+      setSelectedCategory(undefined);
+    } else {
+      setSelectedCategory(id);
+    }
   }
 
   return (
     <Container>
       <Header>
-        <Image source={Logo} />
+        <Image source={Logo}/>
         <Icon
           name="log-out"
           size={24}
@@ -114,8 +132,8 @@ const Dashboard: React.FC = () => {
                 testID={`category-${category.id}`}
               >
                 <Image
-                  style={{ width: 56, height: 56 }}
-                  source={{ uri: category.image_url }}
+                  style={{width: 56, height: 56}}
+                  source={{uri: category.image_url}}
                 />
                 <CategoryItemTitle>{category.title}</CategoryItemTitle>
               </CategoryItem>
@@ -134,8 +152,8 @@ const Dashboard: React.FC = () => {
               >
                 <FoodImageContainer>
                   <Image
-                    style={{ width: 88, height: 88 }}
-                    source={{ uri: food.thumbnail_url }}
+                    style={{width: 88, height: 88}}
+                    source={{uri: food.thumbnail_url}}
                   />
                 </FoodImageContainer>
                 <FoodContent>

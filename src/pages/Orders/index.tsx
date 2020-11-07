@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Image } from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {Image} from 'react-native';
 
 import api from '../../services/api';
 import formatValue from '../../utils/formatValue';
@@ -32,7 +32,14 @@ const Orders: React.FC = () => {
 
   useEffect(() => {
     async function loadOrders(): Promise<void> {
-      // Load orders from API
+      const response = await api.get('/orders');
+
+      setOrders(
+        response.data.map((order: Food) => ({
+          ...order,
+          formattedPrice: formatValue(order.price),
+        })),
+      );
     }
 
     loadOrders();
@@ -48,12 +55,12 @@ const Orders: React.FC = () => {
         <FoodList
           data={orders}
           keyExtractor={item => String(item.id)}
-          renderItem={({ item }) => (
+          renderItem={({item}) => (
             <Food key={item.id} activeOpacity={0.6}>
               <FoodImageContainer>
                 <Image
-                  style={{ width: 88, height: 88 }}
-                  source={{ uri: item.thumbnail_url }}
+                  style={{width: 88, height: 88}}
+                  source={{uri: item.thumbnail_url}}
                 />
               </FoodImageContainer>
               <FoodContent>
